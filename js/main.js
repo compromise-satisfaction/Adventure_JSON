@@ -4,6 +4,7 @@ var Chat_Data = {};
 var Image_Data = {};
 var Sound_Data = {};
 var Choice_Data = {};
+var Choice_Sound = {};
 var Key_settings = {
   決定キー:"c",加速キー:"z",停止キー:"x",メニューキー:"s",
   上キー:"↑",下キー:"↓",左キー:"←",右キー:"→"
@@ -119,7 +120,10 @@ function Game_load(width,height){
         Name = 20;
         Text_Number = 0;
         To_Next = false;
-        if(Sound_Data[Datas.音]) SE1.src = Sound_Data[Datas.音];
+        if(Sound_Data[Datas.音]){
+          SE1.src = Sound_Data[Datas.音];
+          SE1.名前 = Sound_Data[Datas.音];
+        };
         for(var I = 0; I < Row * One_column; I++){
           Text[I]._element.textContent = "";
           Text[I].opacity = 1;
@@ -177,9 +181,7 @@ function Game_load(width,height){
           return;
         };
         Spent = 0;
-
         if(Text_Number==Datas.テキスト.length) To_Next = true;
-
         if(!To_Next){
           if(Datas.テキスト[Text_Number]=="§"){
             Name += 19 - (Text_Number%20);
@@ -201,18 +203,30 @@ function Game_load(width,height){
             if(Text[Text_Number+Name].opacity > 1) Opacity = -0.1;
           }
           else{
-
+            if(Choice_Sound[Datas.選択肢]){
+              if(Sound_Data[Choice_Sound[Datas.選択肢]]!=SE1.名前){
+                SE1.src = Sound_Data[Choice_Sound[Datas.選択肢]];
+                SE1.名前 = Sound_Data[Choice_Sound[Datas.選択肢]];
+              };
+            };
             if(game.input.up&&!game.input.down&&!game.input.left&&!game.input.right&&!Key_config.上.タイム){
               Key_config.上.タイム = 5;
               Choice_Number++;
               if(Choice_Number==Choice_Data[Datas.選択肢].length) Choice_Number = 0;
+              if(Choice_Sound[Datas.選択肢]){
+                if(SE1.paused) SE1.play();
+                else SE1.currentTime = 0;
+              };
             };
             if(!game.input.up&&game.input.down&&!game.input.left&&!game.input.right&&!Key_config.下.タイム){
               Key_config.下.タイム = 5;
               Choice_Number--;
               if(Choice_Number < 0) Choice_Number = Choice_Data[Datas.選択肢].length - 1;
+              if(Choice_Sound[Datas.選択肢]){
+                if(SE1.paused) SE1.play();
+                else SE1.currentTime = 0;
+              };
             };
-
             Temp1 = JSON.stringify(Choice_Data[Datas.選択肢]);
             Temp1 = JSON.parse(Temp1);
             Temp = [];
@@ -283,6 +297,7 @@ function Game_load(width,height){
           break;
         case "選択肢":
           Choice_Data[result[I].名前] = result[I].データ;
+          if(result[I].音) Choice_Sound[result[I].名前] = result[I].音;
           break;
         case "音":
           Sound_Data = result[I].データ;
